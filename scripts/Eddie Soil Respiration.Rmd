@@ -1,0 +1,64 @@
+---
+title: "Eddie Module Soil Respiration"
+output: html_notebook
+---
+
+
+# Install the basic libraries
+```{r install libraries}
+# install.packages("tidyverse")
+# install.packages("readxl")
+# install.packages("janitor")
+# install.packages("lubridate")
+# install.packages("broom")
+# install.packages("patchwork")
+# install.packages("skimr")
+```
+
+# Load libraries    
+Load the libraries each time you run a script or program   
+```{r load libraries, message=FALSE, warning=FALSE}
+library(tidyverse) # loads a lot of libraries in this one to add more functionality
+library(readxl) # allows you to read in excel files
+library(janitor) # cleans up column names and removes empty columns if wanted
+library(lubridate) # allows easy conversion of varaibles to date format
+library(broom) # cleans up output for easy presentation
+library(patchwork)
+library(skimr)
+```
+
+           
+# Read in files
+Decar River in Palo Iowa 15 mintue data
+```{r}
+soil.df <- read_excel("../data/soil_respiration_module_data.xlsx",
+                    sheet = "Data for annual timeseries")
+```
+
+# Plot of soil respiration
+```{r}
+soil.df %>% 
+  ggplot(aes(day_of_year, respirationum_co2_m2_second)) +
+  geom_line() +
+  geom_point()
+```
+# Plot of soil temp
+```{r}
+soil.df %>% 
+  ggplot(aes(day_of_year, soil_temp_c)) +
+  geom_line() +
+  geom_point()
+```
+# Plot of soil moisture
+```{r}
+soil.df %>% 
+  ggplot(aes(day_of_year, soil_moisture_pct)) +
+  geom_line() +
+  geom_point()
+```
+
+
+
+
+
+
