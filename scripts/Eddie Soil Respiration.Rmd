@@ -38,10 +38,23 @@ soil.df <- read_excel("../data/soil_respiration_module_data.xlsx",
 # Plot of soil respiration
 ```{r}
 soil.df %>% 
-  ggplot(aes(day_of_year, respirationum_co2_m2_second)) +
+  ggplot(aes(day_of_year, respiration_um_co2_m2_second)) +
   geom_line() +
   geom_point()
 ```
+
+# Minimum soil respiration
+```{r}
+soil.df %>% 
+  summarize(
+    min_respiration = min(respiration_um_co2_m2_second, na.rm = TRUE),
+    max_respiration = max(respiration_um_co2_m2_second, na.rm = TRUE),
+    mean_respiration = mean(respiration_um_co2_m2_second, na.rm = TRUE),
+    )
+```
+
+
+
 # Plot of soil temp
 ```{r}
 soil.df %>% 
@@ -49,6 +62,19 @@ soil.df %>%
   geom_line() +
   geom_point()
 ```
+
+# Minimum soil temp
+```{r}
+soil.df %>% 
+  summarize(
+    min_temp_c = min(soil_temp_c, na.rm = TRUE),
+    max_temp_c = max(soil_temp_c, na.rm = TRUE),
+    mean_temp_c = mean(soil_temp_c, na.rm = TRUE),
+    )
+```
+
+
+
 # Plot of soil moisture
 ```{r}
 soil.df %>% 
@@ -57,8 +83,105 @@ soil.df %>%
   geom_point()
 ```
 
+```{r}
+soil.df %>% 
+  summarize(
+    min_soil_moisture_pct = min(soil_moisture_pct, na.rm = TRUE),
+    max_soil_moisture_pct = max(soil_moisture_pct, na.rm = TRUE),
+    mean_soil_moisture_pct = mean(soil_moisture_pct, na.rm = TRUE),
+    )
+```
 
 
 
+
+Demonstrate fitting a linear regression curve to the soil CO2 emission rate. Use % soil moisture (column D) as the independent (predictor) variable. Talk through the basics: What is a linear equation? What does the slope mean? What is R2? What is a p value? What does it mean that there is a significant negative correlation between soil moisture and respiration rate? 
+
+# Respiration versus temperature
+```{r}
+soil.df %>% 
+  ggplot(aes(x=soil_temp_c, y=respiration_um_co2_m2_second )) +
+  geom_point() +
+  geom_smooth(method="lm")
+```
+
+# Linear Model of Respiration vs Temperature
+```{r}
+resp_temp.model <- lm(respiration_um_co2_m2_second ~ soil_temp_c, data = soil.df)
+
+summary(resp_temp.model)
+
+```
+
+
+
+```{r}
+soil.df %>% 
+  ggplot(aes(x=soil_moisture_pct, y=respiration_um_co2_m2_second )) +
+  geom_point()
+```
+
+```{r}
+soil.df %>% 
+  ggplot(aes(x=soil_moisture_pct, y=respiration_um_co2_m2_second )) +
+  geom_point() +
+  geom_smooth(method="lm")
+```
+
+# Linear Model of Respiration vs Temperature
+```{r}
+resp_moist.model <- lm(respiration_um_co2_m2_second ~ soil_moisture_pct, data = soil.df)
+
+summary(resp_moist.model)
+
+```
+
+
+# Calculate Fluxes
+```{r}
+soil.df <- soil.df %>% 
+  mutate(micromolco2_m2_day = respiration_um_co2_m2_second * 60 * 60 * 24)
+```
+
+# Calculate Annual Flux
+```{r}
+umole_co2.val <- soil.df %>% 
+  summarize(micromolco2_m2_day = sum(micromolco2_m2_day, na.rm = TRUE))
+
+umole_co2.val
+```
+
+1 mole = 1000000 umole
+
+```{r}
+mole_co2_m2 <- umole_co2.val * (1/1000000)
+mole_co2_m2
+```
+
+
+44 g CO2 per mole
+
+```{r}
+g_co2_m2 <- mole_co2_m2 * 44
+g_co2_m2 
+```
+
+
+
+convert to kg
+1g = 0.001 kg
+```{r}
+kg_co2_m2 <- g_co2_m2 * 0.001
+kg_co2_m2
+```
+
+2.5 x 1011 m2 in state of michigan
+flux from the entire state is 2.88 x 1012 kg for the year
+1 kg = 0.001 metric ton
+```{r}
+co2_flux_mi <- kg_co2_m2 * 2.5 * 10^11
+co2_flux_mi <- co2_flux_mi * 0.001
+co2_flux_mi
+```
 
 
